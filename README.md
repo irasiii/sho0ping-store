@@ -79,6 +79,20 @@ Same Wi-Fi testing without hosting: run the store on your PC, find your PC's IP 
 
 Later, if you want it in the App Store / Google Play like SHEIN, the same backend works — a React Native or Capacitor app wraps this store (Apple charges $99/year, Google $25 one-time).
 
+## Deploy (Render / Railway)
+
+The store is a standard Node app (`node server.js`), so it deploys from this repo with one click. Both hosts give you a free **HTTPS** URL — required for phone cameras and for installing the store as a PWA.
+
+Repo: `https://github.com/irasiii/sho0ping-store`
+
+- **Render** — New → **Blueprint** → connect the repo. Render reads `render.yaml` (free web service, `npm install` → `node server.js`, health check `/`) and deploys automatically. You get an `https://….onrender.com` URL.
+- **Railway** — New Project → **Deploy from GitHub repo** → pick the repo. Railway uses `railway.json` (`npm` builder, `node server.js`, restart-on-failure, health check `/`) and gives you an `https://….up.railway.app` URL.
+
+Notes:
+- The **first image search downloads ~120 MB** for the built-in AI model (cached in `data/models/`, which is gitignored) — a short delay on first use after deploy.
+- On free tiers the disk is **ephemeral** (resets on redeploy). Re-run `npm run seed` once after the first deploy for the catalog, or attach a disk/volume for persistence.
+- Get the `https://…` URL on your phone, open it in Chrome (Android) / Safari (iPhone), and install it from the menu / Share sheet (see above).
+
 ## Next steps (when you're ready)
 
 - Mobile app (the same API works as backend for iOS/Android)
