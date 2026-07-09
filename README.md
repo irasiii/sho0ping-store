@@ -93,6 +93,48 @@ Notes:
 - On free tiers the disk is **ephemeral** (resets on redeploy). Re-run `npm run seed` once after the first deploy for the catalog, or attach a disk/volume for persistence.
 - Get the `https://…` URL on your phone, open it in Chrome (Android) / Safari (iPhone), and install it from the menu / Share sheet (see above).
 
+## Run on Linux (self-host / VPS)
+
+The app is cross-platform Node.js (no Windows-specific code). On a Linux box:
+
+```bash
+git clone https://github.com/irasiii/sho0ping-store.git
+cd sho0ping-store
+npm install
+npm run seed      # one-time: load the catalog
+npm start         # node server.js  →  http://localhost:3000
+```
+
+Make sure the `data/` directory is writable by the user running the app (it creates `db.json`, `users.json` and downloads the AI model into `data/models/` on first use).
+
+**Keep it alive with pm2** (simple, no root needed):
+```bash
+npm install -g pm2
+pm2 start server.js --name sho0ping
+pm2 save && pm2 startup   # auto-restart on boot
+```
+
+**Or as a systemd service** (create `/etc/systemd/system/sho0ping.service`):
+```ini
+[Unit]
+Description=sho0ping store
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/sho0ping-store
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+User=www-data
+Environment=PORT=3000
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+```
+Then: `sudo systemctl daemon-reload && sudo systemctl enable --now sho0ping`
+
+First image search downloads ~120 MB for the built-in AI model — the host needs outbound internet on first use.
+
 ## Next steps (when you're ready)
 
 - Mobile app (the same API works as backend for iOS/Android)
