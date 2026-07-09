@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="380" viewBox="0 0 300 380">
+  <rect width="300" height="380" fill="#f6f7f9"/>
+  <path d="M45 220 q10 -55 60 -60 q28 -3 42 18 q12 18 40 24 l58 12 q22 5 22 24 l0 8 q0 12 -14 12 l-190 0 q-20 0 -18 -20 z" fill="#b0803f" stroke="#1a1a1a" stroke-width="3"/>
+  <path d="M45 246 l212 0 l0 10 q0 8 -10 8 l-192 0 q-12 0 -10 -14 z" fill="#ddd" stroke="#1a1a1a" stroke-width="2"/>
+  <circle cx="110" cy="185" r="4" fill="#fff"/><circle cx="126" cy="192" r="4" fill="#fff"/><circle cx="142" cy="200" r="4" fill="#fff"/>
+  <text x="150" y="300" text-anchor="middle" font-family="Segoe UI, Arial" font-size="15" font-weight="600" fill="#222">Timberland · Men</text>
+  <text x="150" y="324" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11" fill="#555">Timberland 6-Inch Premium Waterproof</text>
+</svg>

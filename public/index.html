@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sho0ping Store — Shop by Picture</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#131921">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="sho0ping">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { --ink: #1a1a1a; --sale: #e4002b; --line: #eaeaea; --accent: #ff6900;
+    --bg: #fff; --panel: #fff; --field: #f7f7f7; --muted2: #777; --btnbg: #1a1a1a; }
+  body[data-theme="dark"] { --ink: #f0f0f5; --sale: #ff6b9d; --line: #2a2a38; --accent: #ff6b9d;
+    --bg: #111118; --panel: #1a1a24; --field: #22222f; --muted2: #8888a0; --btnbg: #7c3aed; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--ink); transition: background .2s; }
+
+  header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 0 28px; display: flex; align-items: center; gap: 30px; position: sticky; top: 0; z-index: 50; min-height: 58px; flex-wrap: wrap; }
+  header h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -.5px; color: var(--ink); text-transform: lowercase; }
+  header h1 span { color: var(--accent); }
+  nav { display: flex; gap: 22px; }
+  nav button { background: none; border: none; border-bottom: 3px solid transparent; color: var(--ink); padding: 19px 2px 16px; cursor: pointer; font-size: .95rem; border-radius: 0; }
+  nav button.active { border-bottom-color: var(--ink); font-weight: 700; }
+  nav button:hover { border-bottom-color: #bbb; }
+
+  main { max-width: 1240px; margin: 0 auto; padding: 26px 28px; }
+  .searchbar { display: flex; gap: 8px; margin-bottom: 14px; }
+  .searchbar input { flex: 1; padding: 11px 14px; border: 1px solid var(--line); border-radius: 2px; font-size: .95rem; background: var(--field); color: var(--ink); }
+  .searchbar input:focus { outline: none; border-color: var(--ink); }
+
+  .cat { background: var(--panel); border: 1px solid #ccc; padding: 7px 18px; border-radius: 20px; cursor: pointer; font-size: .85rem; color: var(--ink); }
+  .cat.active { background: var(--btnbg); color: #fff; border-color: var(--ink); font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 28px 14px; }
+  .card { background: none; border-radius: 0; padding: 0 0 14px; cursor: pointer; box-shadow: none; transition: box-shadow .15s; }
+  .card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.14); }
+  .card img { width: 100%; aspect-ratio: 3 / 4; height: auto; object-fit: cover; background: var(--field); border-radius: 0; display: block; }
+  .card .brand { color: var(--muted2); font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; margin: 10px 10px 0; }
+  .card .title { font-size: .9rem; font-weight: 400; margin: 3px 10px 4px; min-height: 2.4em; }
+  .card .price { font-size: .95rem; font-weight: 700; margin: 0 10px; color: var(--ink); }
+  .card .barcode { color: #999; font-size: .7rem; margin: 5px 10px 0; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: 26px; }
+  .scan-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  .scan-box { border: 1px solid var(--line); border-radius: 2px; padding: 20px; text-align: center; background: var(--field); }
+  .scan-box h3 { margin-bottom: 10px; font-size: .95rem; text-transform: uppercase; letter-spacing: .5px; }
+
+  .btn { background: var(--btnbg); border: none; color: #fff; font-weight: 600; padding: 11px 20px; border-radius: 2px; cursor: pointer; font-size: .9rem; letter-spacing: .3px; }
+  .btn:hover { background: #333; }
+  .btn.secondary { background: var(--panel); color: var(--ink); border: 1px solid var(--line); }
+  .btn.secondary:hover { background: var(--field); }
+
+  #reader { max-width: 340px; margin: 10px auto; }
+  input[type=text].manual, input[type=password].manual, select.manual { padding: 10px 12px; border: 1px solid var(--line); border-radius: 2px; width: 100%; margin-bottom: 10px; font-size: .95rem; background: var(--panel); color: var(--ink); }
+  .result { margin-top: 18px; }
+
+  .detail { display: grid; grid-template-columns: 340px 1fr; gap: 30px; }
+  .detail img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; background: var(--field); border-radius: 0; }
+  .detail .price { font-size: 1.5rem; font-weight: 700; margin: 12px 0; color: var(--ink); }
+  .detail .meta { color: var(--muted2); font-size: .85rem; margin-bottom: 14px; }
+
+  .error { background: #fdecea; color: #b3261e; padding: 12px 16px; border-radius: 2px; margin-top: 14px; }
+  .muted { color: var(--muted2); font-size: .85rem; margin-top: 10px; }
+  .samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .samples img { width: 100%; border: 1px solid var(--line); border-radius: 2px; cursor: pointer; background: var(--panel); transition: transform .1s; }
+  .samples img:hover { transform: scale(1.03); border-color: var(--ink); }
+  .barcode-pic { max-width: 260px; border: 1px solid var(--line); border-radius: 2px; margin-top: 6px; display: block; }
+  .sale-price { color: var(--sale); }
+  #cart-badge { background: var(--sale); color: #fff; border-radius: 50%; font-size: .7rem; padding: 1px 6px; vertical-align: top; }
+  .cart-row { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .cart-row img { width: 60px; aspect-ratio: 3/4; object-fit: cover; background: var(--field); }
+  @media (max-width: 640px) { .detail { grid-template-columns: 1fr; } header { gap: 14px; padding: 0 14px; } main { padding: 18px 14px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>sho<span>0</span>ping store</h1>
+  <nav>
+    <button id="tab-catalog" class="active" onclick="show('catalog')">Catalog</button>
+    <button id="tab-scan" onclick="show('scan')">📷 Search by Picture</button>
+    <button id="tab-admin" onclick="show('admin'); loadAdminTable()" style="display:none">🛒 My Store</button>
+    <button id="tab-report" onclick="show('report'); loadReport()" style="display:none">📊 Report</button>
+  </nav>
+  <div id="userbox" style="margin-left:auto;display:flex;gap:8px;align-items:center"></div>
+</header>
+<main>
+  <!-- CATALOG -->
+  <section id="view-catalog">
+    <div class="searchbar">
+      <input id="q" type="text" placeholder="Search items by name, brand or barcode…" oninput="loadCatalog()">
+    </div>
+    <div id="cats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div id="grid" class="grid"></div>
+  </section>
+
+  <!-- SCAN -->
+  <section id="view-scan" style="display:none">
+    <div class="panel">
+      <h2 style="margin-bottom:14px">Find a product from its picture</h2>
+      <div class="scan-options">
+        <div class="scan-box">
+          <h3>📸 Live camera scan</h3>
+          <p class="muted">Point your camera at the barcode on the product box.</p>
+          <div id="reader"></div>
+          <button class="btn" id="cam-btn" onclick="toggleCamera()">Start camera</button>
+        </div>
+        <div class="scan-box">
+          <h3>🖼️ Upload a photo</h3>
+          <p class="muted">Any picture works — searched with <b>Google image recognition (Lens technology)</b> as the main engine; barcode and built-in AI assist.</p>
+          <input type="file" id="camfile" accept="image/*" capture="environment" style="display:none" onchange="cameraShot()">
+          <button class="btn" style="margin:8px 0" onclick="document.getElementById('camfile').click()">📷 Take a photo</button>
+          <p class="muted" style="margin:2px 0 6px">or choose from gallery:</p>
+          <input type="file" id="file" accept="image/*" style="margin:4px 0" onchange="previewFile()">
+          <div id="file-preview" style="display:none;margin:8px 0">
+            <img id="file-preview-img" style="max-width:160px;max-height:120px;border-radius:8px;border:2px solid #7ac142">
+            <p class="muted" style="color:#2e7d32;margin-top:4px">✔ Image uploaded — press Search photo</p>
+          </div>
+          <br><button class="btn" onclick="scanFile()">Search photo</button>
+        </div>
+        <div class="scan-box" id="barcode-box" style="display:none">
+          <h3>⌨️ Type the barcode</h3>
+          <p class="muted">Enter the EAN/UPC number manually.</p>
+          <input type="text" class="manual" id="manual" placeholder="e.g. 195949048586">
+          <button class="btn" onclick="lookup(document.getElementById('manual').value)">Search</button>
+        </div>
+      </div>
+      <div id="scan-result" class="result"></div>
+      <div id="samples-wrap" style="display:none">
+        <h3 style="margin:22px 0 6px">Try it — sample pictures (admin testing)</h3>
+        <p class="muted" style="margin-bottom:10px">Click any picture below to search the store with it (same as uploading a customer photo), or right-click to save it and test the upload button.</p>
+        <div id="samples" class="samples"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN / MY STORE -->
+  <section id="view-admin" style="display:none">
+    <div class="panel">
+      <h2 style="margin-bottom:6px">My Store — record Amazon prices</h2>
+      <p class="muted" style="margin-bottom:14px">Scan or type an item's barcode. If it's in your store, record today's Amazon price — a <b>new dated price record</b> is saved and all old records are kept. If it's new, add it to your store.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="text" class="manual" style="flex:1;min-width:220px;margin:0" id="adm-code" placeholder="Barcode (EAN/UPC), e.g. 195949048586">
+        <button class="btn" onclick="admCheck()">Check item</button>
+      </div>
+      <div id="adm-result" class="result"></div>
+      <h3 style="margin:24px 0 8px">Users</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" class="manual" style="margin:0;max-width:150px" id="nu-user" placeholder="Username">
+        <input type="password" class="manual" style="margin:0;max-width:150px" id="nu-pass" placeholder="Password">
+        <select class="manual" style="margin:0;max-width:120px" id="nu-role"><option value="user">User</option><option value="admin">Admin</option></select>
+        <button class="btn" onclick="addUser()">Add user</button>
+        <span id="nu-msg" class="muted"></span>
+      </div>
+      <div id="users-list" class="muted" style="margin-top:6px"></div>
+      <h3 style="margin:24px 0 8px">Import from Amazon URL</h3>
+      <p class="muted" style="margin-bottom:8px">Paste an Amazon product page URL to auto-extract ASIN, brand, title and supplier — then add to your store.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" class="manual" style="flex:1;min-width:300px;margin:0" id="adm-amz-url" placeholder="https://www.amazon.com/dp/B0XXXXX or amazon.com/gp/product/...">
+        <button class="btn" onclick="importAmazonUrl()">🔍 Import from Amazon</button>
+        <span id="adm-amz-msg" class="muted"></span>
+      </div>
+      <div id="adm-amz-result" class="result"></div>
+
+      <h3 style="margin:24px 0 8px">All items</h3>
+      <p class="muted" style="margin-bottom:8px">💲 new price (old records kept) · 📦 set stock · 🛒 sell · 🕘 price records · 🛒 Amazon link</p>
+      <div style="overflow-x:auto"><table id="adm-table" style="border-collapse:collapse;width:100%;font-size:.88rem"></table></div>
+    </div>
+  </section>
+
+  <!-- REPORT -->
+  <section id="view-report" style="display:none">
+    <div class="panel">
+      <h2 style="margin-bottom:12px">Store movement report</h2>
+      <div id="rep-totals" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px"></div>
+      <h3 style="margin:10px 0 6px">Price changes (newest first)</h3>
+      <div style="overflow-x:auto"><table id="rep-prices" style="border-collapse:collapse;width:100%;font-size:.88rem"></table></div>
+      <h3 style="margin:20px 0 6px">Items sold</h3>
+      <div style="overflow-x:auto"><table id="rep-sales" style="border-collapse:collapse;width:100%;font-size:.88rem"></table></div>
+      <h3 style="margin:20px 0 6px">Low stock (≤ 5 left)</h3>
+      <div style="overflow-x:auto"><table id="rep-low" style="border-collapse:collapse;width:100%;font-size:.88rem"></table></div>
+    </div>
+  </section>
+
+  <!-- CART -->
+  <section id="view-cart" style="display:none">
+    <div class="panel" style="max-width:640px;margin:0 auto">
+      <h2 style="margin-bottom:12px">🛒 Your cart</h2>
+      <div id="cart-list"></div>
+      <div id="cart-total" style="font-weight:700;font-size:1.1rem;margin:14px 0"></div>
+      <button class="btn" onclick="checkout()">Checkout</button>
+      <button class="btn secondary" onclick="show('catalog')">Keep shopping</button>
+      <div id="cart-msg"></div>
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <section id="view-login" style="display:none">
+    <div class="panel" style="max-width:420px;margin:30px auto">
+      <h2 style="margin-bottom:12px">Log in</h2>
+      <input type="text" class="manual" id="li-user" placeholder="Username">
+      <input type="password" class="manual" id="li-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn" onclick="doLogin()">Log in</button>
+      <div id="li-msg"></div>
+      <p class="muted" style="margin-top:14px">First time? The store starts with an admin account: <b>admin / admin123</b> — change it after logging in by creating a new admin user.</p>
+    </div>
+  </section>
+
+  <!-- DETAIL -->
+  <section id="view-detail" style="display:none">
+    <button class="btn secondary" onclick="show('catalog')" style="margin-bottom:16px">← Back to catalog</button>
+    <div class="panel" id="detail-panel"></div>
+  </section>
+</main>
+
+<script>
+let scanner = null, chart = null;
+
+function show(view) {
+  ['catalog','scan','admin','report','login','cart','detail'].forEach(v => {
+    document.getElementById('view-' + v).style.display = v === view ? '' : 'none';
+    const tab = document.getElementById('tab-' + v);
+    if (tab) tab.classList.toggle('active', v === view);
+  });
+  if (view !== 'scan' && scanner) stopCamera();
+}
+
+function img(p, style) {
+  const fb = (p.imageFallback || '').replace(/'/g, '');
+  return `<img src="${p.image}" alt="" loading="lazy" ${style ? `style="${style}"` : ''} onerror="this.onerror=null${fb ? `;this.src='${fb}'` : ''}">`;
+}
+
+function money(p) {
+  return (p.currency === 'USD' ? '$' : p.currency + ' ') + Number(p.price).toFixed(2);
+}
+
+// sale price + MSRP strikethrough + discount badge
+function priceTag(p) {
+  const onSale = p.msrp && p.msrp > p.price;
+  let out = `<span class="${onSale ? 'sale-price' : ''}">${money(p)}</span>`;
+  if (onSale) {
+    out += ` <span style="color:#888;text-decoration:line-through;font-weight:400;font-size:.85em">$${Number(p.msrp).toFixed(2)}</span>`;
+    if (p.discount) out += ` <span style="color:var(--sale);font-size:.8em;font-weight:600">-${p.discount}%</span>`;
+  }
+  out += amazonLink(p.asin);
+  return out;
+}
+
+function amazonLink(asin) {
+  return asin ? ` <a href="https://www.amazon.com/dp/${asin}" target="_blank" rel="noopener" title="View on Amazon" style="color:var(--accent);text-decoration:none;font-weight:600;font-size:.85em" onclick="event.stopPropagation()"> 🛒 Amazon</a>` : '';
+}
+
+async function loadCatalog() {
+  if (location.protocol === 'file:') {
+    document.getElementById('grid').innerHTML =
+      '<div class="error" style="grid-column:1/-1">This page needs the store server. Please double-click <b>Start-Store.bat</b> in the sho0ping-store folder (or run <b>npm start</b>), then open <a href="http://localhost:3000">http://localhost:3000</a>.</div>';
+    return;
+  }
+  const q = document.getElementById('q').value;
+  const res = await fetch('/api/products?q=' + encodeURIComponent(q));
+  let items = await res.json();
+  if (curCat !== 'All') items = items.filter(p => (p.category || '') === curCat);
+  document.getElementById('grid').innerHTML = items.map(p => `
+    <div class="card" onclick="openDetail(${p.id})">
+      ${img(p)}
+      <div class="brand">${p.brand} · ${p.category || ''}</div>
+      <div class="title">${p.title}</div>
+      <div class="price">${priceTag(p)}</div>
+      <div class="barcode">SKU: ${p.sku || '-'} · Barcode: ${p.barcode}${p.asin ? ' · 🛒 <a href="https://www.amazon.com/dp/' + p.asin + '" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600" onclick="event.stopPropagation()">Amazon</a>' : ''}</div>
+    </div>`).join('') || '<p>No products found.</p>';
+}
+
+async function openDetail(id) {
+  const res = await fetch('/api/products/' + id);
+  const p = await res.json();
+  show('detail');
+  document.getElementById('detail-panel').innerHTML = `
+    <div class="detail">
+      ${img(p)}
+      <div>
+        <div class="brand" style="color:#667;text-transform:uppercase;font-size:.8rem">${p.brand}</div>
+        <h2>${p.title}</h2>
+        <div class="price">${priceTag(p)}</div>
+        ${p.stock > 0 ? `<button class="btn" id="atc-btn" style="margin:4px 0 12px" onclick="addToCart(${p.id}, '${(p.title || '').replace(/'/g, '')}', ${p.price}, '${p.image}')">Add to cart 🛒</button>` : '<p class="muted" style="margin:4px 0 12px">Out of stock</p>'}
+        <div class="meta">SKU: ${p.sku || '-'} · Barcode: ${p.barcode} · ASIN: ${p.asin || '-'}${p.asin ? ` 🛒 <a href="https://www.amazon.com/dp/${p.asin}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600">View on Amazon</a>` : ''}${p.details ? ` · ${p.details.type} · ${p.details.color} · Sizes ${p.details.sizes}` : ''}${p.stock != null ? ` · <b>${p.stock > 0 ? p.stock + ' in stock' : 'out of stock'}</b>` : ''} · Updated: ${new Date(p.updatedAt).toLocaleString()}</div>
+        ${p.description ? `<p style="margin-bottom:12px;color:#333">${p.description}</p>` : ''}
+        ${p.cost || p.material || p.weight || p.supplier ? `<div class="meta"><b>Details:</b> ${p.cost ? 'Cost: $' + Number(p.cost).toFixed(2) : ''}${p.material ? ' · Material: ' + p.material : ''}${p.weight ? ' · Weight: ' + p.weight : ''}${p.supplier ? ' · Supplier: ' + p.supplier : ''}${p.status ? ' · Status: ' + p.status : ''}</div>` : ''}
+        ${p.samplePicture ? `<h3 style="margin:14px 0 4px">Barcode picture</h3><img class="barcode-pic" src="${p.samplePicture}" alt="barcode">` : ''}
+        <h3 style="margin:14px 0 8px">Price history</h3>
+        <canvas id="hist" height="120"></canvas>
+        <div style="margin-top:10px">${historyTable(p.history)}</div>
+      </div>
+    </div>`;
+  const h = p.history || [];
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('hist'), {
+    type: 'line',
+    data: {
+      labels: h.map(x => new Date(x.at).toLocaleDateString()),
+      datasets: [{ label: 'Price', data: h.map(x => x.price), borderColor: '#ff9900', backgroundColor: 'rgba(255,153,0,.15)', fill: true, tension: .25 }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$' + v } } } }
+  });
+}
+
+async function lookup(code) {
+  code = String(code || '').trim();
+  const out = document.getElementById('scan-result');
+  if (!code) { out.innerHTML = '<div class="error">Enter or scan a barcode first.</div>'; return; }
+  const res = await fetch('/api/barcode/' + encodeURIComponent(code));
+  if (!res.ok) {
+    out.innerHTML = `<div class="error">No product found for barcode <b>${code}</b>.</div>`;
+    return;
+  }
+  const p = await res.json();
+  out.innerHTML = `
+    <div class="card" style="max-width:280px" onclick="openDetail(${p.id})">
+      ${img(p)}
+      <div class="brand">${p.brand}</div>
+      <div class="title">${p.title}</div>
+      <div class="price">${money(p)}</div>
+      <div class="barcode">Barcode: ${p.barcode}</div>
+    </div>
+    <p class="muted">Click the card for details and price history.</p>`;
+}
+
+function toggleCamera() {
+  if (scanner) { stopCamera(); return; }
+  scanner = new Html5Qrcode('reader');
+  document.getElementById('cam-btn').textContent = 'Stop camera';
+  scanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 250, height: 150 } },
+    code => { stopCamera(); lookup(code); },
+    () => {}
+  ).catch(err => {
+    document.getElementById('scan-result').innerHTML = `<div class="error">Camera error: ${err}</div>`;
+    stopCamera();
+  });
+}
+
+function stopCamera() {
+  if (!scanner) return;
+  const s = scanner; scanner = null;
+  document.getElementById('cam-btn').textContent = 'Start camera';
+  s.stop().then(() => s.clear()).catch(() => {});
+}
+
+function cameraShot() {
+  const file = document.getElementById('camfile').files[0];
+  if (!file) return;
+  document.getElementById('scan-result').innerHTML = '<p class="muted">🔍 Searching your photo…</p>';
+  scanFile(file);
+}
+
+function previewFile() {
+  const file = document.getElementById('file').files[0];
+  const box = document.getElementById('file-preview');
+  if (!file) { box.style.display = 'none'; return; }
+  const r = new FileReader();
+  r.onload = () => {
+    document.getElementById('file-preview-img').src = r.result;
+    box.style.display = 'block';
+  };
+  r.readAsDataURL(file);
+}
+
+async function scanFile(fileArg) {
+  const file = fileArg || document.getElementById('file').files[0];
+  const out = document.getElementById('scan-result');
+  if (!file) { out.innerHTML = '<div class="error">Choose a photo first.</div>'; return; }
+  out.innerHTML = '<p class="muted">🔍 Searching your image…</p>';
+  // Server handles both barcode decoding + AI search in one call
+  aiSearch(file);
+}
+
+// AI image search: the server combines up to 3 engines —
+// built-in CLIP AI (no key needed), Claude Vision, and Google Vision.
+let lastSearchImage = null; // remembered so "Add to my store" can save it
+
+async function aiSearch(file) {
+  const out = document.getElementById('scan-result');
+  const dataUrl = await new Promise((ok, err) => {
+    const r = new FileReader();
+    r.onload = () => ok(r.result); r.onerror = err;
+    r.readAsDataURL(file);
+  });
+  lastSearchImage = dataUrl;
+  let res;
+  try {
+    res = await fetch('/api/search-image', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ image: dataUrl })
+    });
+  } catch (e) {
+    out.innerHTML = '<div class="error">Server not reachable.</div>';
+    return;
+  }
+  const j = await res.json();
+  const gOff = j.engines && j.engines.google === 'no key';
+  const engineLine = j.engines ? `<p class="muted"><b>Google (main): ${j.engines.google}</b> · Gemini: ${j.engines.gemini || 'n/a'} · Claude: ${j.engines.claude} · Built-in AI: ${j.engines.builtin}</p>` +
+    (gOff ? '<p class="muted">⚠ Google search is not active yet — add your Google API key to config.json (see README). Using built-in AI meanwhile.</p>' : '') : '';
+  if (!res.ok) {
+    out.innerHTML = `<div class="error">${j.error || 'Image search unavailable.'}</div>` + engineLine;
+    return;
+  }
+  const catLine = j.category ? `<p class="muted">Looks like: <b>${j.category.label}</b></p>` : '';
+
+  // Item is NOT in our catalog: show what it is + Amazon import result
+  if (j.inCatalog === false) {
+    let body = `<div class="error" style="background:#fff7e8;color:#7a5200">
+      This looks like <b>${j.identified}</b> — it's not in our store yet.</div>`;
+    if (j.addedFromAmazon && j.addedFromAmazon.length) {
+      body += `<p class="muted" style="margin-top:12px"><b>✔ Found it on Amazon and added ${j.addedFromAmazon.length} item(s) to your store</b> (with today's price recorded):</p>
+        <div class="grid" style="margin-top:10px">${j.addedFromAmazon.map(p => `
+          <div class="card" onclick="openDetail(${p.id})">
+            ${img(p)}
+            <div class="brand">${p.brand || ''}</div>
+            <div class="title">${p.title}</div>
+            <div class="price">$${Number(p.price).toFixed(2)}</div>
+            <div class="barcode">${p.barcode ? 'Barcode: ' + p.barcode : 'ASIN: ' + p.asin}</div>
+          </div>`).join('')}
+        </div>`;
+      loadCatalog();
+    } else {
+      const term = encodeURIComponent(j.identified.replace(/^a /, ''));
+      body += `
+        <p class="muted" style="margin-top:12px">See similar items on Amazon right now:</p>
+        <a class="btn" style="display:inline-block;text-decoration:none;margin-top:6px"
+           href="https://www.amazon.com/s?k=${term}" target="_blank" rel="noopener">🛒 Browse "${j.identified.replace(/^a /, '')}" on Amazon</a>
+        ${j.amazonError ? `<p class="muted" style="margin-top:10px">${j.amazonError} Once the keys are set, matching Amazon items are listed here automatically and added to your store.</p>` : ''}`;
+    }
+    out.innerHTML = catLine + body + engineLine + addFromSearchForm(j.identified, j.category && j.category.label);
+    return;
+  }
+  if (!j.matches.length) {
+    out.innerHTML = catLine + `<div class="error">No matching item found in the catalog.</div>` + engineLine;
+    return;
+  }
+  // Direct match — auto-navigate to the product detail page
+  if (j.directMatch) {
+    out.innerHTML = `<p style="color:#2e7d32;font-weight:700;font-size:1.1rem;margin-bottom:10px">✔ Found it! Opening ${j.directMatch.title}…</p>` + engineLine;
+    setTimeout(() => openDetail(j.directMatch.id), 600);
+    return;
+  }
+  out.innerHTML = catLine + engineLine + `
+    <p class="muted">Not the exact item? You can add it below.</p>
+    <div class="grid" style="margin-top:10px">${j.matches.map(p => `
+      <div class="card" onclick="openDetail(${p.id})">
+        ${img(p)}
+        <div class="brand">${p.brand}</div>
+        <div class="title">${p.title}</div>
+        <div class="price">${money(p)}</div>
+        <div class="barcode">Match: ${p.matchScore} (${p.matchedBy.join(' + ')})</div>
+      </div>`).join('')}
+    </div>` + addFromSearchForm(j.identified || '', j.category && j.category.label);
+}
+
+// "Add searched item to my store": saves the searched photo as a new
+// product so the next picture search finds it.
+function addFromSearchForm(suggestedName, suggestedCat) {
+  if (!me) return `<p class="muted" style="margin-top:14px">🔒 Store admins can add new items from a search — <a href="#" onclick="show('login');return false">log in</a> to add this item.</p>`;
+  if (me.role !== 'admin') return '';
+  const q = (suggestedName || '').replace(/^a /, '').replace(/"/g, '');
+  const autoBar = `
+    <div style="background:#f4f6f9;border-radius:2px;padding:12px 16px;margin-top:16px">
+      <b>⚡ Auto-add from Amazon</b>
+      <p class="muted" style="margin:4px 0 8px">Searches Amazon for the identified item and adds the top matches with all details (ASIN, barcode, photo, description, MSRP, price).</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="text" class="manual" style="margin:0;flex:1;min-width:200px" id="ai-query" value="${q}" placeholder="What to search on Amazon">
+        <button class="btn" onclick="importFromAmazon()">Find on Amazon &amp; add</button>
+      </div>
+      <div id="ai-import-msg"></div>
+    </div>`;
+  return autoBar + manualAddForm(suggestedName, suggestedCat);
+}
+
+async function importFromAmazon() {
+  const msg = document.getElementById('ai-import-msg');
+  const query = document.getElementById('ai-query').value.trim();
+  if (!query) { msg.innerHTML = '<div class="error">Type what to search for.</div>'; return; }
+  msg.innerHTML = '<p class="muted">Searching Amazon…</p>';
+  const res = await fetch('/api/import-from-amazon', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ query })
+  });
+  const j = await res.json();
+  if (!res.ok) {
+    msg.innerHTML = `<div class="error">${j.error}${j.setup ? '<br>' + j.setup : ''}</div>` +
+      `<p class="muted">Until the keys are set, use the manual form below — or <a target="_blank" rel="noopener" href="https://www.amazon.com/s?k=${encodeURIComponent(query)}">open Amazon</a> to copy the details.</p>`;
+    return;
+  }
+  msg.innerHTML = `
+    <p style="color:#2e7d32;margin-top:8px"><b>✔ Added ${j.added.length} item(s) from Amazon:</b></p>
+    <div class="grid" style="margin-top:8px">${j.added.map(p => `
+      <div class="card" onclick="openDetail(${p.id})">
+        ${img(p)}
+        <div class="brand">${p.brand || ''}</div>
+        <div class="title">${p.title}</div>
+        <div class="price">$${Number(p.price).toFixed(2)}</div>
+        <div class="barcode">ASIN: ${p.asin} · Barcode: ${p.barcode || '-'}</div>
+      </div>`).join('')}
+    </div>`;
+  loadCatalog(); loadAdminTable();
+}
+
+function manualAddForm(suggestedName, suggestedCat) {
+  const cats = ['Men', 'Women', 'Boys', 'Girls', 'Bags', 'Accessories', 'Other'];
+  const catGuess = { shoes: 'Men', bag: 'Bags' }[suggestedCat] || 'Other';
+  return `
+    <details style="margin-top:16px;background:#f4f6f9;border-radius:10px;padding:12px 16px">
+      <summary style="cursor:pointer;font-weight:600">➕ Add this item to my store (so the next search finds it)</summary>
+      <div style="display:grid;gap:8px;max-width:420px;margin-top:10px">
+        <input type="text" class="manual" style="margin:0" id="afs-title" placeholder="Item name" value="${(suggestedName || '').replace(/"/g, '')}">
+        <input type="text" class="manual" style="margin:0" id="afs-brand" placeholder="Brand (optional)">
+        <select class="manual" style="margin:0" id="afs-cat">${cats.map(c => `<option ${c === catGuess ? 'selected' : ''}>${c}</option>`).join('')}</select>
+        <input type="text" class="manual" style="margin:0" id="afs-price" placeholder="Price (e.g. 79.99)">
+        <input type="text" class="manual" style="margin:0" id="afs-stock" placeholder="Stock quantity (e.g. 10)">
+        <input type="text" class="manual" style="margin:0" id="afs-msrp" placeholder="MSRP / list price (optional)">
+        <input type="text" class="manual" style="margin:0" id="afs-desc" placeholder="Description (optional)">
+        <input type="text" class="manual" style="margin:0" id="afs-barcode" placeholder="Barcode (optional — auto-generated if empty)">
+        <button class="btn" onclick="addFromSearch()">Add to my store</button>
+        <div id="afs-msg"></div>
+      </div>
+    </details>`;
+}
+
+async function addFromSearch() {
+  const msg = document.getElementById('afs-msg');
+  const title = document.getElementById('afs-title').value.trim();
+  const price = Number(document.getElementById('afs-price').value);
+  if (!title || !price) { msg.innerHTML = '<div class="error">Item name and price are required.</div>'; return; }
+  if (!lastSearchImage) { msg.innerHTML = '<div class="error">Search with a photo first.</div>'; return; }
+  const res = await fetch('/api/products/from-photo', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      title, price,
+      brand: document.getElementById('afs-brand').value.trim(),
+      category: document.getElementById('afs-cat').value,
+      stock: Number(document.getElementById('afs-stock').value) || 1,
+      msrp: Number(document.getElementById('afs-msrp').value) || null,
+      description: document.getElementById('afs-desc').value.trim(),
+      barcode: document.getElementById('afs-barcode').value.trim(),
+      image: lastSearchImage
+    })
+  });
+  const p = await res.json();
+  if (!res.ok) { msg.innerHTML = `<div class="error">${p.error}</div>`; return; }
+  msg.innerHTML = `
+    <div style="background:#e8f5e9;border-radius:10px;padding:12px 16px;margin-top:8px">
+      <b style="color:#2e7d32">✔ Item added to your store!</b>
+      <div class="card" style="max-width:240px;margin-top:10px" onclick="openDetail(${p.id})">
+        <img src="${p.image}" alt="">
+        <div class="brand">${p.brand || ''} · ${p.category}</div>
+        <div class="title">${p.title}</div>
+        <div class="price">$${Number(p.price).toFixed(2)}</div>
+        <div class="barcode">SKU: ${p.sku || '-'} · Barcode: ${p.barcode} · Stock: ${p.stock}</div>
+      </div>
+      <p class="muted">It's now in the catalog and the next picture search will find it. Click the card to view it.</p>
+    </div>`;
+  loadCatalog();
+  loadAdminTable();
+}
+
+// Sample pictures gallery: click a picture -> search the store with it,
+// exactly like a customer photo upload.
+let sampleToProduct = null;
+
+async function loadSamples() {
+  if (location.protocol === 'file:') return;
+  const res = await fetch('/api/products');
+  const items = await res.json();
+  sampleToProduct = new Map();
+  document.getElementById('samples').innerHTML = items
+    .filter(p => {
+      if (p.samplePicture) sampleToProduct.set(p.samplePicture, p);
+      return p.samplePicture;
+    })
+    .map(p => `<img src="${p.samplePicture}" title="${p.title}" onclick="searchSample('${p.samplePicture}')">`)
+    .join('');
+}
+
+async function searchSample(url) {
+  document.getElementById('scan-result').innerHTML = '<p class="muted">Reading picture…</p>';
+  // Look up the product directly — no barcode scan needed for sample pictures
+  if (sampleToProduct) {
+    const p = sampleToProduct.get(url);
+    if (p) { openDetail(p.id); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  }
+  // Fallback: try barcode scan
+  const blob = await (await fetch(url)).blob();
+  scanFile(new File([blob], 'sample.png', { type: blob.type }));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- login / roles ----
+let me = null;
+
+async function whoami() {
+  try {
+    const r = await fetch('/api/me');
+    me = r.ok ? await r.json() : null;
+  } catch (e) { me = null; }
+  renderUserbox();
+}
+
+// ---------- cart ----------
+let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); renderUserbox(); }
+
+function addToCart(id, title, price, image) {
+  const it = cart.find(x => x.id === id);
+  if (it) it.qty++;
+  else cart.push({ id, title, price, image, qty: 1 });
+  saveCart();
+  const b = document.getElementById('atc-btn');
+  if (b) { b.textContent = '✔ In cart'; }
+}
+
+function renderCart() {
+  const list = document.getElementById('cart-list');
+  if (!cart.length) {
+    list.innerHTML = '<p class="muted">Your cart is empty — find something with 📷 Search by Picture!</p>';
+    document.getElementById('cart-total').textContent = '';
+    return;
+  }
+  list.innerHTML = cart.map((x, i) => `
+    <div class="cart-row">
+      <img src="${x.image}" onerror="this.style.visibility='hidden'">
+      <div style="flex:1"><b>${x.title}</b><br><span class="muted">$${Number(x.price).toFixed(2)} each</span></div>
+      <button class="btn secondary" style="padding:4px 10px" onclick="cartQty(${i},-1)">−</button>
+      <span>${x.qty}</span>
+      <button class="btn secondary" style="padding:4px 10px" onclick="cartQty(${i},1)">+</button>
+      <button class="btn secondary" style="padding:4px 10px" onclick="cart.splice(${i},1);saveCart();renderCart()">✕</button>
+    </div>`).join('');
+  const total = cart.reduce((n, x) => n + x.price * x.qty, 0);
+  document.getElementById('cart-total').textContent = `Total: $${total.toFixed(2)}`;
+}
+
+function cartQty(i, d) {
+  cart[i].qty = Math.max(1, cart[i].qty + d);
+  saveCart(); renderCart();
+}
+
+async function checkout() {
+  const msg = document.getElementById('cart-msg');
+  if (!cart.length) { msg.innerHTML = '<div class="error">Cart is empty.</div>'; return; }
+  const res = await fetch('/api/checkout', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ items: cart.map(x => ({ id: x.id, qty: x.qty })) })
+  });
+  const j = await res.json();
+  if (!res.ok) { msg.innerHTML = `<div class="error">${j.error}</div>`; return; }
+  cart = []; saveCart(); renderCart();
+  msg.innerHTML = `<p style="color:#2e7d32;margin-top:12px"><b>✔ Thank you!</b> ${j.itemsSold} item(s) — $${j.total.toFixed(2)}. Order recorded.</p>`;
+  loadCatalog();
+}
+
+// ---------- theme ----------
+function applyTheme(t) {
+  document.body.dataset.theme = t;
+  localStorage.setItem('theme', t);
+}
+function toggleTheme() {
+  applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+  renderUserbox();
+}
+applyTheme(localStorage.getItem('theme') || 'light');
+
+function renderUserbox() {
+  const adm = me && me.role === 'admin';
+  for (const id of ['barcode-box', 'samples-wrap']) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = adm ? '' : 'none';
+  }
+  const isAdmin = me && me.role === 'admin';
+  document.getElementById('tab-admin').style.display = isAdmin ? '' : 'none';
+  document.getElementById('tab-report').style.display = isAdmin ? '' : 'none';
+  const n = cart.reduce((s, x) => s + x.qty, 0);
+  const common = `
+    <button class="btn secondary" style="padding:6px 12px" title="light/dark" onclick="toggleTheme()">${document.body.dataset.theme === 'dark' ? '☀️' : '🌙'}</button>
+    <button class="btn secondary" style="padding:6px 12px" onclick="show('cart');renderCart()">🛒${n ? ' <span id="cart-badge">' + n + '</span>' : ''}</button>`;
+  document.getElementById('userbox').innerHTML = common + (me
+    ? `<span style="color:var(--muted2);font-size:.85rem">👤 ${me.username} (${me.role})</span>
+       <button class="btn secondary" style="padding:6px 12px" onclick="doLogout()">Log out</button>`
+    : `<button class="btn" style="padding:6px 14px" onclick="show('login')">Log in</button>`);
+}
+
+async function doLogin() {
+  const res = await fetch('/api/login', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      username: document.getElementById('li-user').value,
+      password: document.getElementById('li-pass').value
+    })
+  });
+  const j = await res.json();
+  if (!res.ok) { document.getElementById('li-msg').innerHTML = `<div class="error">${j.error}</div>`; return; }
+  me = j; renderUserbox(); show(me.role === 'admin' ? 'admin' : 'catalog');
+  if (me.role === 'admin') loadAdminTable(), loadUsersList();
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  me = null; renderUserbox(); show('catalog');
+}
+
+async function addUser() {
+  const res = await fetch('/api/users', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      username: document.getElementById('nu-user').value,
+      password: document.getElementById('nu-pass').value,
+      role: document.getElementById('nu-role').value
+    })
+  });
+  const j = await res.json();
+  document.getElementById('nu-msg').textContent = res.ok ? `✔ added ${j.username} (${j.role})` : j.error;
+  if (res.ok) { document.getElementById('nu-user').value = ''; document.getElementById('nu-pass').value = ''; loadUsersList(); }
+}
+
+async function loadUsersList() {
+  const r = await fetch('/api/users');
+  if (!r.ok) return;
+  const users = await r.json();
+  document.getElementById('users-list').textContent =
+    'Accounts: ' + users.map(u => `${u.username} (${u.role})`).join(' · ');
+}
+
+let curCat = 'All';
+const CATS = ['All', 'Men', 'Women', 'Boys', 'Girls', 'Bags', 'Accessories'];
+
+function renderCats() {
+  document.getElementById('cats').innerHTML = CATS.map(c =>
+    `<button class="cat ${c === curCat ? 'active' : ''}" onclick="curCat='${c}';renderCats();loadCatalog()">${c}</button>`).join('');
+}
+
+function td(x, extra) { return `<td style="padding:6px 10px;border-bottom:1px solid #eee;${extra || ''}">${x}</td>`; }
+function th(x) { return `<th style="text-align:left;padding:6px 10px;border-bottom:2px solid #ddd">${x}</th>`; }
+
+async function loadAdminTable() {
+  const res = await fetch('/api/report');
+  const r = await res.json();
+  document.getElementById('adm-table').innerHTML =
+    `<tr>${th('Photo')}${th('Item')}${th('SKU')}${th('Category')}${th('Cost')}${th('Price')}${th('Margin')}${th('Stock')}${th('Sold')}${th('Amazon')}${th('Actions')}</tr>` +
+    r.items.map(x => {
+      const margin = x.cost && x.price ? Math.round((1 - x.cost / x.price) * 100) : '-';
+      const amz = x.asin ? `<a href="https://www.amazon.com/dp/${x.asin}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-size:1.1rem" title="View on Amazon">🛒</a>` : '-';
+      const photo = x.image
+        ? `<img src="${x.image}" onerror="this.onerror=null;this.src='${(x.imageFallback || '').replace(/'/g, '')}'" style="width:44px;height:56px;object-fit:cover;border-radius:4px;background:var(--field);cursor:pointer" onclick="openDetail(${x.id})">`
+        : '—';
+      return `<tr>
+      ${td(photo)}${td(x.title)}${td(x.sku || '-')}${td(x.category)}${td(x.cost ? '$' + Number(x.cost).toFixed(2) : '-')}${td((x.msrp ? '<span style="color:#888;text-decoration:line-through;font-size:.8em">$' + Number(x.msrp).toFixed(2) + '</span> ' : '') + '$' + Number(x.price).toFixed(2))}
+      ${td(margin + '%', margin !== '-' && margin < 20 ? 'color:#b3261e;font-weight:700' : '')}
+      ${td(x.stock, x.stock <= 5 ? 'color:#b3261e;font-weight:700' : '')}${td(x.sold)}
+      ${td(amz)}
+      ${td(`<button class="btn secondary" style="padding:4px 8px" title="new price" onclick="admQuickPrice(${x.id})">💲</button>
+            <button class="btn secondary" style="padding:4px 8px" title="set stock" onclick="admQuickStock(${x.id},${x.stock})">📦</button>
+            <button class="btn secondary" style="padding:4px 8px" title="sell" onclick="admQuickSell(${x.id})">🛒</button>
+            <button class="btn secondary" style="padding:4px 8px" title="price records" onclick="document.getElementById('adm-code').value='${x.barcode}';admCheck();window.scrollTo({top:0,behavior:'smooth'})">🕘</button>`)}
+    </tr>`;
+    }).join('');
+}
+
+async function admQuickPrice(id) {
+  const v = prompt('New price (old records are kept):');
+  if (!v || !Number(v)) return;
+  await fetch(`/api/products/${id}/price`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ price: Number(v) }) });
+  loadAdminTable(); loadCatalog();
+}
+async function admQuickStock(id, cur) {
+  const v = prompt('Stock quantity:', cur);
+  if (v == null) return;
+  await fetch(`/api/products/${id}/stock`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ stock: Number(v) }) });
+  loadAdminTable();
+}
+async function admQuickSell(id) {
+  const v = prompt('How many sold?', '1');
+  if (!v || !Number(v)) return;
+  await fetch(`/api/products/${id}/sell`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ qty: Number(v) }) });
+  loadAdminTable();
+}
+
+async function loadReport() {
+  const res = await fetch('/api/report');
+  const r = await res.json();
+  const box = (label, val) => `<div style="background:#f4f6f9;border-radius:10px;padding:14px 20px;min-width:130px">
+    <div style="font-size:1.5rem;font-weight:700">${val}</div><div class="muted" style="margin:0">${label}</div></div>`;
+  document.getElementById('rep-totals').innerHTML =
+    box('Items', r.totals.items) + box('Stock left (units)', r.totals.stockUnits) +
+    box('Units sold', r.totals.soldUnits) + box('Revenue', '$' + r.totals.revenue.toFixed(2)) +
+    box('Price changes', r.totals.priceChanges);
+  document.getElementById('rep-prices').innerHTML =
+    `<tr>${th('Date')}${th('Item')}${th('Old price')}${th('New price')}</tr>` +
+    (r.priceChanges.map(x => `<tr>${td(new Date(x.at).toLocaleString())}${td(x.title)}${td('$' + x.from.toFixed(2))}${td('$' + x.to.toFixed(2), x.to > x.from ? 'color:#b3261e' : 'color:#2e7d32')}</tr>`).join('') || `<tr>${td('No price changes yet')}</tr>`);
+  document.getElementById('rep-sales').innerHTML =
+    `<tr>${th('Date')}${th('Item')}${th('Qty')}${th('Price at sale')}</tr>` +
+    (r.sales.map(x => `<tr>${td(new Date(x.at).toLocaleString())}${td(x.title)}${td(x.qty)}${td('$' + Number(x.price).toFixed(2))}</tr>`).join('') || `<tr>${td('No sales recorded yet')}</tr>`);
+  document.getElementById('rep-low').innerHTML =
+    `<tr>${th('Item')}${th('Category')}${th('Stock left')}</tr>` +
+    (r.lowStock.map(x => `<tr>${td(x.title)}${td(x.category)}${td(x.stock, 'color:#b3261e;font-weight:700')}</tr>`).join('') || `<tr>${td('Nothing low')}</tr>`);
+}
+
+function historyTable(hist) {
+  if (!hist || !hist.length) return '<p class="muted">No price records yet.</p>';
+  const rows = [...hist].reverse().map((x, i) => `
+    <tr${i === 0 ? ' style="font-weight:700;background:#fff7e8"' : ''}>
+      <td style="padding:6px 12px;border-bottom:1px solid #eee">${new Date(x.at).toLocaleDateString()} ${new Date(x.at).toLocaleTimeString()}</td>
+      <td style="padding:6px 12px;border-bottom:1px solid #eee">$${Number(x.price).toFixed(2)}</td>
+      <td style="padding:6px 12px;border-bottom:1px solid #eee;color:#778">${i === 0 ? 'current price' : ''}</td>
+    </tr>`).join('');
+  return `<table style="border-collapse:collapse;margin-top:6px"><thead><tr>
+    <th style="text-align:left;padding:6px 12px;border-bottom:2px solid #ddd">Date</th>
+    <th style="text-align:left;padding:6px 12px;border-bottom:2px solid #ddd">Price</th><th></th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+async function admCheck() {
+  const code = document.getElementById('adm-code').value.trim();
+  const out = document.getElementById('adm-result');
+  if (!code) { out.innerHTML = '<div class="error">Type or scan a barcode first.</div>'; return; }
+  const res = await fetch('/api/barcode/' + encodeURIComponent(code));
+  if (res.ok) {
+    const p = await res.json();
+    out.innerHTML = `
+      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-top:8px">
+        ${img(p, 'width:110px;background:#f6f7f9;border-radius:8px')}
+        <div style="flex:1;min-width:260px">
+          <b>${p.brand} — ${p.title}</b>
+          <div class="price" style="color:#b12704;font-weight:700">Current: $${Number(p.price).toFixed(2)}</div>
+          <div style="display:flex;gap:8px;margin:10px 0">
+            <input type="text" class="manual" style="margin:0;max-width:160px" id="adm-price" placeholder="New Amazon price">
+            <button class="btn" onclick="admRecord(${p.id})">Record new price</button>
+          </div>
+          <h3 style="margin-top:10px">Price records (newest first)</h3>
+          <div id="adm-history">${historyTable(p.history)}</div>
+        </div>
+      </div>`;
+  } else {
+    out.innerHTML = `
+      <p class="muted">Barcode <b>${code}</b> is not in your store yet — add it:</p>
+      <div style="display:grid;gap:8px;max-width:420px;margin-top:8px">
+        <input type="text" class="manual" style="margin:0" id="adm-title" placeholder="Item name (e.g. Nike Air Max 270)">
+        <input type="text" class="manual" style="margin:0" id="adm-brand" placeholder="Brand (e.g. Nike)">
+        <input type="text" class="manual" style="margin:0" id="adm-newprice" placeholder="Amazon price today (e.g. 79.99)">
+        <button class="btn" onclick="admAdd('${code.replace(/[^0-9]/g, '')}')">Add to my store</button>
+      </div>`;
+  }
+}
+
+async function admRecord(id) {
+  const price = Number(document.getElementById('adm-price').value);
+  if (!price) return;
+  const res = await fetch('/api/products/' + id + '/price', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ price })
+  });
+  const p = await res.json();
+  document.getElementById('adm-history').innerHTML = historyTable(p.history);
+  document.getElementById('adm-price').value = '';
+  admCheck();
+}
+
+async function admAdd(code) {
+  const title = document.getElementById('adm-title').value.trim();
+  const brand = document.getElementById('adm-brand').value.trim();
+  const price = Number(document.getElementById('adm-newprice').value);
+  const out = document.getElementById('adm-result');
+  if (!title || !price) { out.insertAdjacentHTML('beforeend', '<div class="error">Name and price are required.</div>'); return; }
+  await fetch('/api/products', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ title, brand, barcode: code, price })
+  });
+  admCheck();
+  loadCatalog();
+}
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+whoami();
+renderCats();
+loadCatalog();
+loadSamples();
+</script>
+</body>
+</html>

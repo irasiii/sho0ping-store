@@ -1,0 +1,13 @@
+{
+  "geminiApiKey": "YOUR_GEMINI_API_KEY_free_from_aistudio.google.com",
+  "anthropicApiKey": "YOUR_ANTHROPIC_API_KEY",
+  "googleVisionApiKey": "YOUR_GOOGLE_VISION_API_KEY",
+  "accessKey": "YOUR_PAAPI_ACCESS_KEY",
+  "secretKey": "YOUR_PAAPI_SECRET_KEY",
+  "partnerTag": "YOUR_ASSOCIATE_TAG-20",
+  "host": "webservices.amazon.com",
+  "region": "us-east-1",
+  "marketplace": "www.amazon.com",
+  "keywords": ["pair of shoes", "men shoes", "women shoes", "kids shoes"],
+  "pagesPerKeyword": 2
+}
