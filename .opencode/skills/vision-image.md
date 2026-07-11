@@ -11,15 +11,24 @@ vision instead of trying to view it.
 
 ## How to use
 
-Run the helper with Node (the project already has Node 18+ with global fetch):
+Two providers are supported. Run the helper with Node (the project already has
+Node 18+ with global fetch):
 
+Gemini:
 ```
 node tools/vision.js <imagePath> [optional prompt]
 ```
+- Key from `GEMINI_API_KEY` (env) or `gimini-key.txt` in repo root.
 
-- The key is read from `GEMINI_API_KEY` (env) or `gimini-key.txt` in the repo root.
-  Never print or commit the key.
+Claude (Anthropic) — stronger vision, no quota issues like Gemini free tier:
+```
+node tools/vision-claude.js <imagePath> [optional prompt]
+```
+- Key from `ANTHROPIC_API_KEY` (env) or `claude-key.txt` in repo root.
+
+General:
 - The script prints a text description to stdout and also saves it to `.vision-last.txt`.
+- Never print or commit the key.
 - In WSL/Docker, the repo is at `/root/app/sho0ping-store`; run the same command there.
 
 ## Workflow
