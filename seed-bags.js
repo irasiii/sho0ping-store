@@ -30,26 +30,26 @@ const BAG_SUPPLIERS = {
 };
 
 const bags = [
-  { brand: 'Michael Kors', title: 'Jet Set Large Travel Tote',       type: 'Tote',      color: 'Saffiano Black',  price: 198.00, stock: 18, hue: '#2a2a2c' },
-  { brand: 'Coach',        title: 'Tabby Shoulder Bag 26',           type: 'Shoulder',  color: 'Signature Tan',   price: 350.00, stock: 12, hue: '#9c6b3f' },
-  { brand: 'Kate Spade',   title: 'Margaux Medium Satchel',          type: 'Satchel',   color: 'Black',           price: 328.00, stock: 10, hue: '#1a1a1c' },
-  { brand: 'Longchamp',    title: 'Le Pliage Original Tote',         type: 'Tote',      color: 'French Rose',     price: 150.00, stock: 22, hue: '#d98aa6' },
-  { brand: 'Fossil',       title: 'Fiona Crossbody Bag',             type: 'Crossbody', color: 'Brown',           price: 129.00, stock: 20, hue: '#6e4b2a' },
-  { brand: 'Guess',        title: 'Emmie Mini Top-Handle Bag',       type: 'Mini Bag',  color: 'Cognac',          price: 89.00,  stock: 24, hue: '#8a5a33' },
-  { brand: 'Charles & Keith', title: 'Quilted Shoulder Bag',         type: 'Shoulder',  color: 'Cream',           price: 75.00,  stock: 30, hue: '#e8e6e0' },
-  { brand: 'Aldo',         title: 'Rhegan Faux-Leather Tote',        type: 'Tote',      color: 'Stone Grey',      price: 55.00,  stock: 35, hue: '#9aa0a8' },
-  { brand: 'Calvin Klein', title: 'Rhea Chain Crossbody',            type: 'Crossbody', color: 'Black',           price: 99.00,  stock: 16, hue: '#26262a' },
-  { brand: 'Tommy Hilfiger', title: 'Logo Canvas Tote',              type: 'Tote',      color: 'Navy/Red',        price: 98.00,  stock: 19, hue: '#243350' },
-  { brand: 'Furla',        title: 'Metropolis Mini Bag',             type: 'Mini Bag',  color: 'Burgundy',        price: 245.00, stock: 8,  hue: '#6e2436' },
-  { brand: 'Nine West',    title: 'Bridie Satchel',                  type: 'Satchel',   color: 'Blush',           price: 69.00,  stock: 26, hue: '#e3c8ca' },
-  { brand: 'Michael Kors', title: 'Sofie Chain Wallet',              type: 'Wallet',    color: 'Soft Pink',       price: 128.00, stock: 14, hue: '#e8a7bd' },
-  { brand: 'Coach',        title: 'Willis Top Handle Bag',           type: 'Shoulder',  color: 'Chalk',           price: 375.00, stock: 9,  hue: '#efefe9' },
-  { brand: 'Kate Spade',   title: 'Cameron Street Box Bag',          type: 'Clutch',    color: 'Glitter Gold',    price: 178.00, stock: 11, hue: '#c9a227' },
-  { brand: 'Fossil',       title: 'Rachel Satchel',                  type: 'Satchel',   color: 'Black',           price: 168.00, stock: 13, hue: '#1e1e22' },
-  { brand: 'Aldo',         title: 'Pax Small Backpack',              type: 'Backpack',  color: 'Tan',             price: 65.00,  stock: 28, hue: '#b0803f' },
-  { brand: 'Charles & Keith', title: 'Drawstring Bucket Bag',        type: 'Crossbody', color: 'Olive',           price: 72.00,  stock: 21, hue: '#5a5f44' },
-  { brand: 'Guess',        title: 'Core Tote Bag',                   type: 'Tote',      color: 'Beige',           price: 118.00, stock: 17, hue: '#cabf9f' },
-  { brand: 'Longchamp',    title: 'Le Pliage Mini Backpack',         type: 'Backpack',  color: 'Eucalyptus',      price: 175.00, stock: 15, hue: '#7d8470' }
+  { brand: 'Michael Kors', title: 'Jet Set Travel Large Saffiano Leather Tote', type: 'Tote',      color: 'Black',          price: 358.00, stock: 18, hue: '#2a2a2c' },
+  { brand: 'Michael Kors', title: 'Laila Medium Pebbled Leather Tote',          type: 'Tote',      color: 'Black',          price: 259.50, stock: 12, hue: '#1a1a1c' },
+  { brand: 'Michael Kors', title: 'Jet Set Charm Leather Crossbody',            type: 'Crossbody', color: 'Soft Pink',      price: 159.50, stock: 14, hue: '#e8a7bd' },
+  { brand: 'Michael Kors', title: 'Nolita Large Nubuck Hobo Shoulder Bag',      type: 'Shoulder',  color: 'Camel',          price: 298.00, stock: 10, hue: '#b0803f' },
+  { brand: 'Michael Kors', title: 'Scarlett Large East West Top Zip Tote',      type: 'Tote',      color: 'Black',          price: 179.70, stock: 16, hue: '#26262a' },
+  { brand: 'Michael Kors', title: 'Quinn Medium Pebbled Leather Tote',          type: 'Tote',      color: 'Black',          price: 199.50, stock: 13, hue: '#222' },
+  { brand: 'Coach',        title: 'Tabby Shoulder Bag 26',                      type: 'Shoulder',  color: 'Signature Tan',   price: 350.00, stock: 12, hue: '#9c6b3f' },
+  { brand: 'Coach',        title: 'Willis Top Handle Bag',                      type: 'Shoulder',  color: 'Chalk',          price: 375.00, stock: 9,  hue: '#efefe9' },
+  { brand: 'Kate Spade',   title: 'Margaux Medium Satchel',                     type: 'Satchel',   color: 'Black',          price: 328.00, stock: 10, hue: '#1a1a1c' },
+  { brand: 'Kate Spade',   title: 'Duo Mini Shoulder Bag',                      type: 'Mini Bag',  color: 'Black',          price: 158.00, stock: 22, hue: '#333336' },
+  { brand: 'Kate Spade',   title: 'Do It All Tote Bag',                         type: 'Tote',      color: 'Black',          price: 298.00, stock: 19, hue: '#222' },
+  { brand: 'Kate Spade',   title: 'Bond Mini Bag',                              type: 'Mini Bag',  color: 'Black',          price: 258.00, stock: 17, hue: '#1e1e22' },
+  { brand: 'Kate Spade',   title: 'Deco Mini Crossbody Bag',                    type: 'Crossbody', color: 'Black',          price: 278.00, stock: 15, hue: '#26262a' },
+  { brand: 'Kate Spade',   title: 'Loop Large Shoulder Bag',                    type: 'Shoulder',  color: 'Black',          price: 348.00, stock: 11, hue: '#2b2b2e' },
+  { brand: 'Longchamp',    title: 'Le Pliage Original Tote',                    type: 'Tote',      color: 'French Rose',     price: 150.00, stock: 22, hue: '#d98aa6' },
+  { brand: 'Longchamp',    title: 'Le Pliage Mini Backpack',                    type: 'Backpack',  color: 'Eucalyptus',      price: 175.00, stock: 15, hue: '#7d8470' },
+  { brand: 'Fossil',       title: 'Fiona Crossbody Bag',                        type: 'Crossbody', color: 'Brown',           price: 129.00, stock: 20, hue: '#6e4b2a' },
+  { brand: 'Fossil',       title: 'Rachel Satchel',                             type: 'Satchel',   color: 'Black',           price: 168.00, stock: 13, hue: '#1e1e22' },
+  { brand: 'Calvin Klein', title: 'Rhea Chain Crossbody',                       type: 'Crossbody', color: 'Black',           price: 99.00,  stock: 16, hue: '#26262a' },
+  { brand: 'Guess',        title: 'Logan Deluxe Satchel',                       type: 'Satchel',   color: 'Cognac',          price: 118.00, stock: 17, hue: '#8a5a33' }
 ];
 
 function bagSvg(b) {

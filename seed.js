@@ -11,5 +11,6 @@ db.save({ products: [], priceHistory: [], sales: [] });
 
 require('./seed-shoes');
 require('./seed-bags');
+require('./fetch-images'); // swap SVG placeholders for real community photos
 
-console.log('Catalog seeded: shoes (Men/Women/Boys/Girls) + ladies bags.');
+console.log('Catalog seeded: shoes (Men/Women/Boys/Girls) + ladies bags, with real photos.');

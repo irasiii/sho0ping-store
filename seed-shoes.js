@@ -1,7 +1,8 @@
 // Seeds the store with a full shoe catalog: Men, Women, Boys, Girls.
 // Each item: barcode (valid UPC-A check digit), category, details (type,
 // color, sizes), price, stock, cost, material, weight, supplier, status, tags.
-// Run: node seed-shoes.js
+// Real, currently-selling models (Nike Air Force 1, Adidas Samba OG, New
+// Balance 574/9060, etc.). Run: node seed-shoes.js
 const fs = require('fs');
 const path = require('path');
 const db = require('./lib/db');
@@ -25,40 +26,43 @@ const CAT_SUPPLIERS = {
   Timberland: 'VF Corporation', Skechers: 'Skechers USA Inc.',
   Converse: 'Converse / Nike', Clarks: 'Clarks PLC', Crocs: 'Crocs Inc.',
   Puma: 'Puma SE', 'Steve Madden': 'Steve Madden Ltd.', UGG: 'Deckers Brands',
-  Birkenstock: 'Birkenstock Group', 'Under Armour': 'Under Armour Inc.'
+  Birkenstock: 'Birkenstock Group', 'Under Armour': 'Under Armour Inc.',
+  Hoka: 'Hoka / Deckers'
 };
 
 const shoes = [
-  { cat: 'Men',   brand: 'Nike',       title: 'Air Max 270 Running Shoes',        type: 'Sneakers', color: 'Black/White',  sizes: '7-13',  price: 129.99, stock: 24, hue: '#2b2b2e' },
-  { cat: 'Men',   brand: 'Adidas',     title: 'Ultraboost 24 Running Shoes',      type: 'Sneakers', color: 'Core Black',   sizes: '7-13',  price: 179.99, stock: 18, hue: '#1e1e22' },
-  { cat: 'Men',   brand: 'New Balance',title: '574 Classic Sneakers',             type: 'Sneakers', color: 'Grey',         sizes: '7-14',  price: 89.99,  stock: 30, hue: '#8f8f93' },
-  { cat: 'Men',   brand: 'Timberland', title: '6-Inch Premium Waterproof Boots',  type: 'Boots',    color: 'Wheat',        sizes: '8-13',  price: 198.00, stock: 12, hue: '#b0803f' },
-  { cat: 'Men',   brand: 'Skechers',   title: 'Go Walk Max Slip-On',              type: 'Walking',  color: 'Navy',         sizes: '7-13',  price: 65.00,  stock: 40, hue: '#2c3d5e' },
-  { cat: 'Men',   brand: 'Converse',   title: 'Chuck Taylor All Star High Top',   type: 'Casual',   color: 'Black',        sizes: '6-13',  price: 65.00,  stock: 35, hue: '#333336' },
-  { cat: 'Men',   brand: 'Clarks',     title: 'Tilden Cap Oxford Dress Shoes',    type: 'Dress',    color: 'Dark Tan',     sizes: '7-13',  price: 75.00,  stock: 15, hue: '#6e4b2a' },
-  { cat: 'Men',   brand: 'Crocs',      title: 'Classic Clog',                     type: 'Sandals',  color: 'Slate Grey',   sizes: '7-13',  price: 49.99,  stock: 50, hue: '#5a5f66' },
-  { cat: 'Men',   brand: 'Puma',       title: 'Suede Classic XXI',                type: 'Sneakers', color: 'Red/White',    sizes: '7-13',  price: 74.99,  stock: 20, hue: '#a33333' },
-  { cat: 'Women', brand: 'Nike',       title: 'Air Force 1 \'07 Women',           type: 'Sneakers', color: 'White',        sizes: '5-11',  price: 114.99, stock: 28, hue: '#e8e6e0' },
-  { cat: 'Women', brand: 'Adidas',     title: 'Grand Court 2.0 Women',            type: 'Sneakers', color: 'White/Rose',   sizes: '5-11',  price: 64.99,  stock: 32, hue: '#e3c8ca' },
-  { cat: 'Women', brand: 'Skechers',   title: 'D\'Lites Memory Foam Women',       type: 'Sneakers', color: 'White/Silver', sizes: '5-11',  price: 69.99,  stock: 26, hue: '#c9ccd4' },
-  { cat: 'Women', brand: 'Steve Madden', title: 'Daisie Pointed Toe Pumps',       type: 'Heels',    color: 'Black Patent', sizes: '5-11',  price: 89.95,  stock: 14, hue: '#1a1a1c' },
-  { cat: 'Women', brand: 'UGG',        title: 'Classic Short II Boots Women',     type: 'Boots',    color: 'Chestnut',     sizes: '5-11',  price: 170.00, stock: 10, hue: '#8a5a33' },
-  { cat: 'Women', brand: 'Birkenstock', title: 'Arizona Soft Footbed Sandals',    type: 'Sandals',  color: 'Mocha',        sizes: '5-11',  price: 135.00, stock: 16, hue: '#7a5c44' },
-  { cat: 'Women', brand: 'New Balance', title: 'Fresh Foam 1080v13 Women',        type: 'Running',  color: 'Lilac',        sizes: '5-11',  price: 164.99, stock: 15, hue: '#b9a6d0' },
-  { cat: 'Women', brand: 'Converse',   title: 'Chuck Taylor Lift Platform Women', type: 'Casual',   color: 'White',        sizes: '5-11',  price: 75.00,  stock: 22, hue: '#efefe9' },
-  { cat: 'Women', brand: 'Crocs',      title: 'Brooklyn Low Wedge Women',         type: 'Sandals',  color: 'Black',        sizes: '5-11',  price: 59.99,  stock: 25, hue: '#26262a' },
-  { cat: 'Boys',  brand: 'Nike',       title: 'Revolution 7 Boys (Little Kids)',  type: 'Sneakers', color: 'Blue/Volt',    sizes: '11C-3Y', price: 52.99, stock: 30, hue: '#2456a8' },
-  { cat: 'Boys',  brand: 'Adidas',     title: 'Duramo SL Boys (Big Kids)',        type: 'Running',  color: 'Black/Lime',   sizes: '3.5Y-7Y', price: 54.99, stock: 24, hue: '#3a4a1e' },
-  { cat: 'Boys',  brand: 'Skechers',   title: 'S Lights Flex-Glow Boys',          type: 'Light-Up', color: 'Charcoal/Red', sizes: '10.5C-4Y', price: 47.00, stock: 20, hue: '#4b3038' },
-  { cat: 'Boys',  brand: 'Under Armour', title: 'Assert 10 Boys School Shoes',    type: 'Running',  color: 'Black/White',  sizes: '3.5Y-7Y', price: 57.99, stock: 18, hue: '#2f2f33' },
-  { cat: 'Boys',  brand: 'Crocs',      title: 'Classic Clog Kids Boys',           type: 'Sandals',  color: 'Navy',         sizes: '8C-3Y',  price: 39.99, stock: 40, hue: '#243350' },
-  { cat: 'Boys',  brand: 'New Balance', title: '888v2 Boys Hook and Loop',        type: 'Sneakers', color: 'Team Royal',   sizes: '10.5C-4Y', price: 54.99, stock: 16, hue: '#2a4a9e' },
-  { cat: 'Girls', brand: 'Nike',       title: 'Flex Runner 3 Girls (Little Kids)', type: 'Sneakers', color: 'Pink Foam',   sizes: '11C-3Y', price: 47.99, stock: 28, hue: '#e8a7bd' },
-  { cat: 'Girls', brand: 'Adidas',     title: 'Grand Court 2.0 Girls',             type: 'Sneakers', color: 'White/Pink',  sizes: '10.5C-4Y', price: 49.99, stock: 26, hue: '#f0d3dc' },
-  { cat: 'Girls', brand: 'Skechers',   title: 'Twinkle Toes Light-Up Girls',       type: 'Light-Up', color: 'Multi/Rainbow', sizes: '10.5C-4Y', price: 49.00, stock: 22, hue: '#c76bb7' },
-  { cat: 'Girls', brand: 'Converse',   title: 'Chuck Taylor All Star Girls Low',   type: 'Casual',   color: 'Pink Glaze',  sizes: '10.5C-3Y', price: 44.99, stock: 20, hue: '#dd8fae' },
-  { cat: 'Girls', brand: 'Crocs',      title: 'Classic Glitter Clog Girls',        type: 'Sandals',  color: 'Ballerina Pink', sizes: '8C-3Y', price: 44.99, stock: 34, hue: '#e5a3c0' },
-  { cat: 'Girls', brand: 'UGG',        title: 'Keelan Kids Boots Girls',           type: 'Boots',    color: 'Chestnut',    sizes: '13C-4Y', price: 110.00, stock: 8,  hue: '#96683e' }
+  { cat: 'Men',   brand: 'Nike',       title: 'Air Max 270',                     type: 'Sneakers', color: 'Black/White',   sizes: '7-13',  price: 150.00, stock: 24, hue: '#2b2b2e' },
+  { cat: 'Men',   brand: 'Adidas',     title: 'Samba OG',                        type: 'Sneakers', color: 'Core Black',    sizes: '7-13',  price: 100.00, stock: 18, hue: '#1e1e22' },
+  { cat: 'Men',   brand: 'New Balance',title: '574 Core',                       type: 'Sneakers', color: 'Grey',          sizes: '7-14',  price: 89.99,  stock: 30, hue: '#8f8f93' },
+  { cat: 'Men',   brand: 'Timberland', title: '6-Inch Premium Waterproof Boots',type: 'Boots',    color: 'Wheat',         sizes: '8-13',  price: 198.00, stock: 12, hue: '#b0803f' },
+  { cat: 'Men',   brand: 'Skechers',   title: 'Go Walk Max Slip-On',            type: 'Walking',  color: 'Navy',          sizes: '7-13',  price: 65.00,  stock: 40, hue: '#2c3d5e' },
+  { cat: 'Men',   brand: 'Converse',   title: 'Chuck Taylor All Star High Top', type: 'Casual',   color: 'Black',         sizes: '6-13',  price: 65.00,  stock: 35, hue: '#333336' },
+  { cat: 'Men',   brand: 'Clarks',     title: 'Tilden Cap Oxford Dress Shoes',  type: 'Dress',    color: 'Dark Tan',      sizes: '7-13',  price: 75.00,  stock: 15, hue: '#6e4b2a' },
+  { cat: 'Men',   brand: 'Crocs',      title: 'Classic Clog',                   type: 'Sandals',  color: 'Slate Grey',    sizes: '7-13',  price: 49.99,  stock: 50, hue: '#5a5f66' },
+  { cat: 'Men',   brand: 'Puma',       title: 'Suede Classic XXI',              type: 'Sneakers', color: 'Red/White',     sizes: '7-13',  price: 74.99,  stock: 20, hue: '#a33333' },
+  { cat: 'Men',   brand: 'Nike',       title: "Air Force 1 '07",                type: 'Sneakers', color: 'White',         sizes: '7-13',  price: 115.00, stock: 28, hue: '#e8e6e0' },
+  { cat: 'Women', brand: 'Nike',       title: "Air Force 1 '07 Women",          type: 'Sneakers', color: 'White',         sizes: '5-11',  price: 115.00, stock: 28, hue: '#e8e6e0' },
+  { cat: 'Women', brand: 'Adidas',     title: 'Gazelle Indoor Women',           type: 'Sneakers', color: 'Green/White',   sizes: '5-11',  price: 120.00, stock: 32, hue: '#3a5a3a' },
+  { cat: 'Women', brand: 'Skechers',   title: "D'Lites Memory Foam Women",      type: 'Sneakers', color: 'White/Silver',  sizes: '5-11',  price: 69.99,  stock: 26, hue: '#c9ccd4' },
+  { cat: 'Women', brand: 'Steve Madden', title: 'Daisie Pointed Toe Pumps',     type: 'Heels',    color: 'Black Patent',  sizes: '5-11',  price: 89.95,  stock: 14, hue: '#1a1a1c' },
+  { cat: 'Women', brand: 'UGG',        title: 'Classic Short II Boots Women',   type: 'Boots',    color: 'Chestnut',      sizes: '5-11',  price: 170.00, stock: 10, hue: '#8a5a33' },
+  { cat: 'Women', brand: 'Birkenstock', title: 'Arizona Soft Footbed Sandals',  type: 'Sandals',  color: 'Mocha',         sizes: '5-11',  price: 135.00, stock: 16, hue: '#7a5c44' },
+  { cat: 'Women', brand: 'New Balance', title: '9060 Sneaker Women',            type: 'Running',  color: 'Lilac',         sizes: '5-11',  price: 150.00, stock: 15, hue: '#b9a6d0' },
+  { cat: 'Women', brand: 'Converse',   title: 'Chuck Taylor Lift Platform Women', type: 'Casual', color: 'White',         sizes: '5-11',  price: 75.00,  stock: 22, hue: '#efefe9' },
+  { cat: 'Women', brand: 'Crocs',      title: 'Brooklyn Low Wedge Women',       type: 'Sandals',  color: 'Black',         sizes: '5-11',  price: 59.99,  stock: 25, hue: '#26262a' },
+  { cat: 'Women', brand: 'Hoka',       title: 'Clifton 9 Women',                type: 'Running',  color: 'Black/White',   sizes: '5-11',  price: 145.00, stock: 18, hue: '#2f2f33' },
+  { cat: 'Boys',  brand: 'Nike',       title: 'Revolution 7 (Little Kids)',     type: 'Sneakers', color: 'Blue/Volt',     sizes: '11C-3Y', price: 52.99, stock: 30, hue: '#2456a8' },
+  { cat: 'Boys',  brand: 'Adidas',     title: 'Duramo SL (Big Kids)',           type: 'Running',  color: 'Black/Lime',    sizes: '3.5Y-7Y', price: 54.99, stock: 24, hue: '#3a4a1e' },
+  { cat: 'Boys',  brand: 'Skechers',   title: 'S Lights Flex-Glow',             type: 'Light-Up', color: 'Charcoal/Red',  sizes: '10.5C-4Y', price: 47.00, stock: 20, hue: '#4b3038' },
+  { cat: 'Boys',  brand: 'Under Armour', title: 'Assert 10 (Big Kids)',         type: 'Running',  color: 'Black/White',   sizes: '3.5Y-7Y', price: 57.99, stock: 18, hue: '#2f2f33' },
+  { cat: 'Boys',  brand: 'Crocs',      title: 'Classic Clog Kids',             type: 'Sandals',  color: 'Navy',          sizes: '8C-3Y',  price: 39.99, stock: 40, hue: '#243350' },
+  { cat: 'Boys',  brand: 'New Balance', title: '530 (Grade School)',            type: 'Sneakers', color: 'Team Royal',    sizes: '10.5C-4Y', price: 74.99, stock: 16, hue: '#2a4a9e' },
+  { cat: 'Girls', brand: 'Nike',       title: 'Flex Runner 3 (Little Kids)',   type: 'Sneakers', color: 'Pink Foam',     sizes: '11C-3Y', price: 47.99, stock: 28, hue: '#e8a7bd' },
+  { cat: 'Girls', brand: 'Adidas',     title: 'Grand Court 2.0 Girls',          type: 'Sneakers', color: 'White/Pink',    sizes: '10.5C-4Y', price: 49.99, stock: 26, hue: '#f0d3dc' },
+  { cat: 'Girls', brand: 'Skechers',   title: 'Twinkle Toes Light-Up',          type: 'Light-Up', color: 'Multi/Rainbow', sizes: '10.5C-4Y', price: 49.00, stock: 22, hue: '#c76bb7' },
+  { cat: 'Girls', brand: 'Converse',   title: 'Chuck Taylor All Star Girls Low',type: 'Casual',   color: 'Pink Glaze',    sizes: '10.5C-3Y', price: 44.99, stock: 20, hue: '#dd8fae' },
+  { cat: 'Girls', brand: 'Crocs',      title: 'Classic Glitter Clog Girls',    type: 'Sandals',  color: 'Ballerina Pink',sizes: '8C-3Y',  price: 44.99, stock: 34, hue: '#e5a3c0' },
+  { cat: 'Girls', brand: 'UGG',        title: 'Keelan Kids Boots Girls',        type: 'Boots',    color: 'Chestnut',     sizes: '13C-4Y', price: 110.00, stock: 8,  hue: '#96683e' }
 ];
 
 function shoeSvg(s) {
@@ -77,9 +81,6 @@ const imgDir = path.join(__dirname, 'public', 'images');
 if (!fs.existsSync(imgDir)) fs.mkdirSync(imgDir, { recursive: true });
 
 const d = db.load();
-
-// tag existing items (phones) with a category so the catalog filter works
-for (const p of d.products) if (!p.category) p.category = 'Phones';
 
 shoes.forEach((s, i) => {
   const barcode = upc('19700' + String(240001 + i));
