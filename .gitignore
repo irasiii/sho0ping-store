@@ -3,4 +3,7 @@ data/
 *.log
 .DS_Store
 sho0ping-store
+gimini-key*
+*.key
+image.png
 

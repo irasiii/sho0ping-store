@@ -6,3 +6,6 @@ sho0ping-store
 npm-debug.log
 *.log
 .DS_Store
+gimini-key*
+*.key
+image.png
