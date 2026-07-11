@@ -15,10 +15,12 @@ function tagFor(p) {
   const map = {
     Sneakers: 'sneakers', Running: 'sneakers', Walking: 'sneakers', Casual: 'sneakers',
     'Light-Up': 'sneakers', Boots: 'boots', Sandals: 'sandals', Heels: 'highheels',
-    Dress: 'shoes', Backpack: 'backpack', Duffel: 'bag', Tote: 'handbag',
-    Socks: 'socks', Insoles: 'shoes', 'Shoe care': 'shoes'
+    Dress: 'shoes', Backpack: 'backpack', Tote: 'handbag', Satchel: 'handbag',
+    Shoulder: 'handbag', Crossbody: 'handbag', 'Mini Bag': 'handbag', Clutch: 'handbag',
+    Wallet: 'wallet', Belt: 'belt', Sunglasses: 'sunglasses', Cap: 'hat', Socks: 'socks'
   };
-  return map[t] || ({ Bags: 'bag', Accessories: 'shoes' }[p.category] || 'shoes');
+  const catMap = { Bags: 'handbag', Accessories: 'fashion', Shoes: 'sneakers' };
+  return map[t] || catMap[p.category] || 'shoes';
 }
 
 async function grab(url) {
@@ -44,8 +46,7 @@ async function grab(url) {
       const tag = tagFor(p);
       const tries = [
         `https://loremflickr.com/600/800/${tag}?lock=${p.id}`,
-        `https://loremflickr.com/600/800/${tag}?lock=${p.id + 137}`,
-        `https://loremflickr.com/600/800/shoes?lock=${p.id + 55}`
+        `https://loremflickr.com/600/800/${tag}?lock=${p.id + 137}`
       ];
       let saved = false;
       for (const url of tries) {
