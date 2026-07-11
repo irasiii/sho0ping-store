@@ -135,6 +135,34 @@ Then: `sudo systemctl daemon-reload && sudo systemctl enable --now sho0ping`
 
 First image search downloads ~120 MB for the built-in AI model — the host needs outbound internet on first use.
 
+## Run with Docker
+
+A `Dockerfile` (Node 18 slim) and `docker-compose.yml` are included. `.dockerignore` keeps `node_modules`, `data/` and the local token file out of the image.
+
+```bash
+# Build and start
+docker compose up -d --build
+
+# Load the catalog (one-time; writes into the persisted volume)
+docker compose exec app npm run seed
+
+# Open it
+xdg-open http://localhost:3000   # or just visit http://localhost:3000
+```
+
+Without Compose, plain Docker also works:
+
+```bash
+docker build -t sho0ping-store .
+docker run -d -p 3000:3000 -v sho0ping-data:/app/data --name sho0ping sho0ping-store
+docker exec sho0ping npm run seed
+```
+
+Notes:
+- Data lives in the `appdata` volume (Compose) or `sho0ping-data` volume (plain) and survives restarts.
+- First image search downloads ~120 MB for the built-in AI model into the volume — needs outbound internet on first use.
+- The server listens on `PORT` (default 3000); map it as needed.
+
 ## Next steps (when you're ready)
 
 - Mobile app (the same API works as backend for iOS/Android)

@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    image: sho0ping-store
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - appdata:/app/data
+    restart: unless-stopped
+
+volumes:
+  appdata:
