@@ -351,7 +351,7 @@ app.post('/api/search-image', async (req, res) => {
 
   await Promise.all(jobs);
 
-  const category = engines.builtin.ok ? engines.builtin.category : null;
+  let category = engines.builtin.ok ? engines.builtin.category : null;
 
   // Combine: normalize each engine's scores to 0..1, then weighted sum.
   // Google (Lens technology / Cloud Vision) is the MAIN engine; others assist.
@@ -399,6 +399,13 @@ app.post('/api/search-image', async (req, res) => {
     (matches[0] ? `${matches[0].brand} ${matches[0].title}`.trim() : '') ||
     (category ? category.label : '');
 
+  // Trust a confident product match over CLIP's zero-shot category label.
+  const stocked = ['shoes', 'bag', 'accessories', 'barcode label'];
+  const confidentMatch = matches.length && matches[0].matchScore >= 0.5;
+  if (confidentMatch && (!category || !stocked.includes(category.label))) {
+    category = { label: matches[0].category, score: matches[0].matchScore };
+  }
+
   const base = {
     primary: engines.google.ok ? 'google' : (engines.claude.ok ? 'claude' : 'builtin'),
     engines: engineSummary,
@@ -408,8 +415,7 @@ app.post('/api/search-image', async (req, res) => {
   };
 
   // Item is (probably) something we stock -> show catalog matches.
-  const stocked = ['shoes', 'bag', 'accessories', 'barcode label'];
-  const inCatalog = !category || stocked.includes(category.label);
+  const inCatalog = (!category || stocked.includes(category.label)) || confidentMatch;
   if (inCatalog) {
     const result = { ...base, inCatalog: true, matches };
     imgSearchCache.set(cacheKey, { ts: Date.now(), data: result });
