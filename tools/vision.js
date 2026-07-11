@@ -9,8 +9,10 @@ const MODEL = process.argv[4] || process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
 function loadKey() {
   if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY.trim();
-  const p = path.join(__dirname, '..', 'gimini-key.txt');
-  if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8').trim();
+  for (const name of ['gimini-key.txt', 'gimini-key', '.gimini-key']) {
+    const p = path.join(__dirname, '..', name);
+    if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8').trim();
+  }
   throw new Error('No Gemini key: set GEMINI_API_KEY or add gimini-key.txt');
 }
 
