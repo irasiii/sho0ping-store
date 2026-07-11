@@ -83,7 +83,7 @@
   <nav>
     <button id="tab-catalog" class="active" onclick="show('catalog')">Catalog</button>
     <button id="tab-scan" onclick="show('scan')">📷 Search by Picture</button>
-    <button id="tab-admin" onclick="show('admin'); loadAdminTable()" style="display:none">🛒 My Store</button>
+    <button id="tab-admin" onclick="show('admin'); loadAdminTable(); loadUsersList()" style="display:none">🛒 My Store</button>
     <button id="tab-report" onclick="show('report'); loadReport()" style="display:none">📊 Report</button>
   </nav>
   <div id="userbox" style="margin-left:auto;display:flex;gap:8px;align-items:center"></div>
@@ -509,6 +509,50 @@ async function importFromAmazon() {
   loadCatalog(); loadAdminTable();
 }
 
+// "Import from Amazon URL" (My Store): extract the ASIN (and a best-effort
+// product name from the URL slug), then reuse the /api/import-from-amazon
+// endpoint — with PA-API keys it imports full details, without keys it still
+// adds the item with its ASIN so it can be completed later.
+async function importAmazonUrl() {
+  const msg = document.getElementById('adm-amz-msg');
+  const out = document.getElementById('adm-amz-result');
+  const url = document.getElementById('adm-amz-url').value.trim();
+  if (!url) { out.innerHTML = '<div class="error">Paste an Amazon product URL first.</div>'; return; }
+  const m = url.match(/(?:\/dp\/|\/gp\/product\/|\/gp\/aw\/d\/)(B[A-Z0-9]{9})/i) || url.match(/^\s*(B[A-Z0-9]{9})\s*$/i);
+  if (!m) { out.innerHTML = '<div class="error">Could not find an ASIN in that URL — it should contain <b>/dp/B0…</b> or <b>/gp/product/B0…</b> (or paste the 10-character ASIN itself).</div>'; return; }
+  const asin = m[1].toUpperCase();
+  const slug = (url.match(/amazon\.[^/]+\/([^/]{4,})\/dp\//i) || [])[1] || '';
+  const name = decodeURIComponent(slug).replace(/[-+_]/g, ' ').trim() || asin;
+  msg.textContent = 'Importing…';
+  let res, j;
+  try {
+    res = await fetch('/api/import-from-amazon', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: name, asin })
+    });
+    j = await res.json();
+  } catch (e) { msg.textContent = ''; out.innerHTML = '<div class="error">Server not reachable.</div>'; return; }
+  msg.textContent = '';
+  if (!res.ok) {
+    out.innerHTML = `<div class="error">${j.error || 'Import failed.'}${j.setup ? '<br>' + j.setup : ''}</div>`;
+    return;
+  }
+  out.innerHTML = `
+    <p style="color:#2e7d32;margin-top:8px"><b>✔ Added ${j.added.length} item(s):</b></p>
+    <div class="grid" style="margin-top:8px">${j.added.map(p => `
+      <div class="card" onclick="openDetail(${p.id})">
+        ${img(p)}
+        <div class="brand">${p.brand || ''}</div>
+        <div class="title">${p.title}</div>
+        <div class="price">$${Number(p.price).toFixed(2)}</div>
+        <div class="barcode">ASIN: ${p.asin} · Barcode: ${p.barcode || '-'}</div>
+      </div>`).join('')}
+    </div>
+    ${j.added.some(p => !p.price) ? '<p class="muted">No Amazon API keys configured — the item was added with its ASIN only. Set its price/stock in the All items table below.</p>' : ''}`;
+  document.getElementById('adm-amz-url').value = '';
+  loadCatalog(); loadAdminTable();
+}
+
 function manualAddForm(suggestedName, suggestedCat) {
   const cats = ['Men', 'Women', 'Boys', 'Girls', 'Bags', 'Accessories', 'Other'];
   const catGuess = { shoes: 'Men', bag: 'Bags' }[suggestedCat] || 'Other';
@@ -658,7 +702,8 @@ async function checkout() {
   const j = await res.json();
   if (!res.ok) { msg.innerHTML = `<div class="error">${j.error}</div>`; return; }
   cart = []; saveCart(); renderCart();
-  msg.innerHTML = `<p style="color:#2e7d32;margin-top:12px"><b>✔ Thank you!</b> ${j.itemsSold} item(s) — $${j.total.toFixed(2)}. Order recorded.</p>`;
+  msg.innerHTML = `<p style="color:#2e7d32;margin-top:12px"><b>✔ Thank you!</b> ${j.itemsSold} item(s) — $${j.total.toFixed(2)}. Order recorded.</p>` +
+    (j.unavailable && j.unavailable.length ? `<p class="muted">Note: ${j.unavailable.join(' · ')}</p>` : '');
   loadCatalog();
 }
 

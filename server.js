@@ -230,12 +230,21 @@ app.post('/api/checkout', (req, res) => {
   if (!items.length) return res.status(400).json({ error: 'cart is empty' });
   const d = db.load();
   let count = 0, total = 0;
+  const unavailable = [];
   for (const it of items) {
-    const p = db.recordSale(d, Number(it.id), Number(it.qty) || 1);
-    if (p) { count += Number(it.qty) || 1; total += p.price * (Number(it.qty) || 1); }
+    const prod = d.products.find(p => p.id === Number(it.id));
+    if (!prod) { unavailable.push('item #' + it.id); continue; }
+    // never sell more than what's in stock
+    const wanted = Math.max(1, Number(it.qty) || 1);
+    const qty = Math.min(wanted, prod.stock || 0);
+    if (!qty) { unavailable.push(prod.title + ' (out of stock)'); continue; }
+    if (qty < wanted) unavailable.push(`${prod.title} (only ${qty} left — sold ${qty})`);
+    const p = db.recordSale(d, prod.id, qty);
+    if (p) { count += qty; total += p.price * qty; }
   }
+  if (!count) return res.status(409).json({ error: 'Sorry — ' + (unavailable.join(', ') || 'nothing available') + '.' });
   db.save(d);
-  res.json({ ok: true, itemsSold: count, total: Math.round(total * 100) / 100 });
+  res.json({ ok: true, itemsSold: count, total: Math.round(total * 100) / 100, unavailable });
 });
 
 // One-click import: search Amazon for a product name and add the top
@@ -353,16 +362,21 @@ app.post('/api/search-image', async (req, res) => {
 
   let category = engines.builtin.ok ? engines.builtin.category : null;
 
-  // Combine: normalize each engine's scores to 0..1, then weighted sum.
-  // Google (Lens technology / Cloud Vision) is the MAIN engine; others assist.
+  // Combine: normalize each engine's scores to 0..1, then weighted sum,
+  // divided by the total weight of the engines that actually answered so the
+  // final matchScore is a true 0..1 "share of the vote" (1.0 = every engine
+  // ranked this product first). Google (Lens technology) is the MAIN engine.
   const weights = { google: 2.0, gemini: 1.6, claude: 1.2, builtin: 1.0 };
   const combined = new Map();
+  let weightSum = 0;
   for (const [name, eng] of Object.entries(engines)) {
     if (!eng.ok || !eng.results || !eng.results.length) continue;
+    weightSum += weights[name];
     const max = Math.max(...eng.results.map(r => r.score));
     for (const r of eng.results) {
-      const cur = combined.get(r.product.id) || { product: r.product, score: 0, engines: [] };
+      const cur = combined.get(r.product.id) || { product: r.product, score: 0, engines: [], clipProb: 0 };
       cur.score += (max ? r.score / max : 0) * weights[name];
+      if (name === 'builtin') cur.clipProb = r.score; // raw CLIP probability (0..1)
       cur.engines.push(name);
       combined.set(r.product.id, cur);
     }
@@ -370,15 +384,20 @@ app.post('/api/search-image', async (req, res) => {
   const combinedArr = [...combined.values()]
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);
+  const share = m => (weightSum ? m.score / weightSum : 0);
   const matches = combinedArr
-    .map(m => ({ ...m.product, matchScore: Math.round(m.score * 100) / 100, matchedBy: m.engines }));
+    .map(m => ({ ...m.product, matchScore: Math.round(share(m) * 100) / 100, matchedBy: m.engines }));
 
-  // Determine if there's a direct match (auto-navigate to product)
+  // Determine if there's a direct match (auto-navigate to product).
+  // The built-in CLIP engine ALWAYS returns a ranking (however weak), so when
+  // it is the only engine that answered we additionally require its raw
+  // probability to be high — otherwise any photo would auto-open a product.
   let directMatch = null;
   if (combinedArr.length > 0) {
-    const top = combinedArr[0].score;
-    const second = combinedArr.length > 1 ? combinedArr[1].score : 0;
-    if (top >= 0.7 && top >= second * 1.2) {
+    const top = share(combinedArr[0]);
+    const second = combinedArr.length > 1 ? share(combinedArr[1]) : 0;
+    const corroborated = combinedArr[0].engines.some(n => n !== 'builtin') || combinedArr[0].clipProb >= 0.5;
+    if (top >= 0.7 && top >= second * 1.2 && corroborated) {
       directMatch = matches[0];
     }
   }
@@ -400,8 +419,11 @@ app.post('/api/search-image', async (req, res) => {
     (category ? category.label : '');
 
   // Trust a confident product match over CLIP's zero-shot category label.
+  // Same corroboration rule as directMatch: a builtin-only ranking counts as
+  // confident only when CLIP's raw probability actually backs it up.
   const stocked = ['shoes', 'bag', 'accessories', 'barcode label'];
-  const confidentMatch = matches.length && matches[0].matchScore >= 0.5;
+  const confidentMatch = combinedArr.length > 0 && share(combinedArr[0]) >= 0.5 &&
+    (combinedArr[0].engines.some(n => n !== 'builtin') || combinedArr[0].clipProb >= 0.3);
   if (confidentMatch && (!category || !stocked.includes(category.label))) {
     category = { label: matches[0].category, score: matches[0].matchScore };
   }

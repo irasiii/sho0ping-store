@@ -4,6 +4,9 @@ data/
 .DS_Store
 sho0ping-store
 gimini-key*
+claude-key*
 *.key
 image.png
-
+config.json
+public/uploads/
+.vision-last.txt

@@ -1,6 +1,6 @@
 # sho0ping store — Shop by Picture
 
-Web store where customers find a phone by **taking a picture of its barcode** (or live camera scan, or typing the code). Every product stores its details, current price, and **full price history**.
+Web store where customers find a product by **taking a picture of it** (or of its barcode) (or live camera scan, or typing the code). Every product stores its details, current price, and **full price history**.
 
 ## Run it on your computer (Windows)
 
@@ -13,12 +13,12 @@ Web store where customers find a phone by **taking a picture of its barcode** (o
    ```
 3. Open **http://localhost:3000** in your browser.
 
-The seed step loads 30 sample phones so you can demo everything today.
+The seed step loads the sample catalog (shoes, ladies bags and accessories, ~90 items with real product photos) so you can demo everything today.
 
 ## Features
 
-- **Catalog** — browse/search all phones with images, prices, barcodes.
-- **Search by Picture** — 3 ways: live camera scan, upload any photo (barcode read instantly; otherwise **Google image detection** identifies the phone and shows best matches), or type the EAN/UPC.
+- **Catalog** — browse/search all products with images, prices, barcodes.
+- **Search by Picture** — 3 ways: live camera scan, upload any photo (barcode read instantly; otherwise **Google image detection** identifies the product and shows best matches), or type the EAN/UPC.
 - **Product page** — details + price history chart.
 - **Price history** — every price change is recorded automatically with a timestamp.
 
@@ -51,7 +51,7 @@ Results show which engines matched each product. Without any key, the built-in e
 1. Get an **Amazon Associates** account: https://affiliate-program.amazon.com (sign up, add payment/tax info). Note: Amazon requires 3 qualifying sales in 180 days to keep the account.
 2. In Associates Central: **Tools → Product Advertising API → Join** to get your Access Key, Secret Key, and Partner Tag.
 3. Copy `config.example.json` to `config.json` and paste the 3 keys.
-4. Run `npm run sync` — it pulls real phone products (title, brand, image, price, barcode) from Amazon into your database.
+4. Run `npm run sync` — it pulls real products (title, brand, image, price, barcode) from Amazon into your database.
 5. Run it daily (Windows Task Scheduler) to build up price history automatically.
 
 ## Files
@@ -59,7 +59,7 @@ Results show which engines matched each product. Without any key, the built-in e
 - `server.js` — web server + API
 - `public/index.html` — the store UI
 - `lib/db.js` — database with price-history logic
-- `seed.js` — sample phone catalog
+- `seed.js` — sample catalog (shoes + bags + accessories)
 - `amazon-sync.js` — Amazon PA-API importer
 
 ## Real product photos
