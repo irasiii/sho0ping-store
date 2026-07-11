@@ -39,14 +39,15 @@ async function grab(url) {
   for (const p of d.products) {
     // skip photos the admin uploaded and already-downloaded ones
     if (String(p.image || '').startsWith('/uploads/')) { skip++; continue; }
-    const file = `real-${p.id}.jpg`;
+    const tag = tagFor(p);
+    const fetchTag = (p.category === 'Bags') ? `${tag},bag` : tag;
+    const file = `real-${tag}-${p.id}.jpg`;
     const dest = path.join(IMG_DIR, file);
 
     if (!fs.existsSync(dest)) {
-      const tag = tagFor(p);
       const tries = [
-        `https://loremflickr.com/600/800/${tag}?lock=${p.id}`,
-        `https://loremflickr.com/600/800/${tag}?lock=${p.id + 137}`
+        `https://loremflickr.com/600/800/${fetchTag}?lock=${p.id}`,
+        `https://loremflickr.com/600/800/${fetchTag}?lock=${p.id + 137}`
       ];
       let saved = false;
       for (const url of tries) {
