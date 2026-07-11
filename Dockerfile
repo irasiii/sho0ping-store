@@ -11,8 +11,8 @@ COPY . .
 
 # Runtime data dirs (db.json, users.json, AI model, uploaded photos).
 # Persist with a volume so data survives container restarts.
-RUN mkdir -p /app/data /app/public/uploads \
- && chown -R node:node /app/data /app/public/uploads
+RUN mkdir -p /app/data /app/public/uploads /app/public/images \
+  && chown -R node:node /app/data /app/public/uploads /app/public/images
 
 USER node
 
