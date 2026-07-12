@@ -97,6 +97,18 @@ Notes:
 
 The app is cross-platform Node.js (no Windows-specific code). On a Linux box:
 
+**One command** (the Linux twin of Start-Store.bat — installs/repairs dependencies, seeds the catalog on first run, prints the LAN URLs for your phone, starts the server):
+
+```bash
+git clone https://github.com/irasiii/sho0ping-store.git
+cd sho0ping-store
+bash start-store.sh          # or: chmod +x start-store.sh && ./start-store.sh
+```
+
+Extras: `./start-store.sh stop` stops it, `./start-store.sh seed` reloads the sample catalog, `PORT=8080 ./start-store.sh` uses another port.
+
+Or step by step:
+
 ```bash
 git clone https://github.com/irasiii/sho0ping-store.git
 cd sho0ping-store
@@ -138,6 +150,14 @@ First image search downloads ~120 MB for the built-in AI model — the host need
 ## Run with Docker
 
 A `Dockerfile` (Node 18 slim) and `docker-compose.yml` are included. `.dockerignore` keeps `node_modules`, `data/` and the local token file out of the image.
+
+**One command** — builds the image, starts the container, seeds the catalog into the volume on first run, and prints the URLs:
+
+```bash
+./start-store.sh docker      # then: ./start-store.sh logs | stop | seed
+```
+
+Or step by step:
 
 ```bash
 # Build and start
